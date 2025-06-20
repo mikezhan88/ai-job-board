@@ -80,3 +80,6 @@ import {
       applications: many(JobListingApplicationTable),
     })
   )
+
+  
+
