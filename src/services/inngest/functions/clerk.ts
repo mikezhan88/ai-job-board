@@ -24,6 +24,8 @@ function verifyWebhook({
   return new Webhook(env.CLERK_WEBHOOK_SECRET).verify(raw, headers)
 }
 
+
+
 export const clerkCreateUser = inngest.createFunction(
   { id: "clerk/create-db-user", name: "Clerk - Create DB User" },
   {
