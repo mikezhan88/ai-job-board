@@ -290,7 +290,7 @@ export function JobListingForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <MarkdownEditor {...field} markdown={field.value} />
+                  <MarkdownEditor {...field} markdown={field.value} /> 
               </FormControl>
               <FormMessage />
             </FormItem>
