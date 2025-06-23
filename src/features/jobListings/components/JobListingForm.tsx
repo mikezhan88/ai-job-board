@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { jobListingSchema } from "../actions/schemas" 
+import { jobListingSchema } from "../actions/schemas"
 import {
   Form,
   FormControl,
@@ -40,7 +40,7 @@ import { MarkdownEditor } from "@/components/markdown/MarkdownEditor"
 import { Button } from "@/components/ui/button"
 import { LoadingSwap } from "@/components/LoadingSwap"
 import { Loader2Icon } from "lucide-react"
-import { createJobListing } from "../actions/actions"
+import { createJobListing, updateJobListing } from "../actions/actions"
 import { toast } from "sonner"
 
 const NONE_SELECT_VALUE = "none"
@@ -78,7 +78,9 @@ export function JobListingForm({
   })
 
   async function onSubmit(data: z.infer<typeof jobListingSchema>) {
-    const action = createJobListing
+    const action = jobListing
+      ? updateJobListing.bind(null, jobListing.id)
+      : createJobListing
     const res = await action(data)
 
     if (res.error) {
@@ -290,7 +292,7 @@ export function JobListingForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                  <MarkdownEditor {...field} markdown={field.value} /> 
+                <MarkdownEditor {...field} markdown={field.value} />
               </FormControl>
               <FormMessage />
             </FormItem>
