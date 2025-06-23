@@ -1,5 +1,20 @@
 import { JobListingStatus } from "@/drizzle/schema"
 
+// Polyfill for Object.groupBy (ES2024 feature)
+export function groupBy<T, K extends string | number | symbol>(
+  items: T[],
+  keySelector: (item: T) => K
+): Record<K, T[]> {
+  return items.reduce((groups, item) => {
+    const key = keySelector(item)
+    if (!groups[key]) {
+      groups[key] = []
+    }
+    groups[key].push(item)
+    return groups
+  }, {} as Record<K, T[]>)
+}
+
 export function getNextJobListingStatus(status: JobListingStatus) {
   switch (status) {
     case "draft":
