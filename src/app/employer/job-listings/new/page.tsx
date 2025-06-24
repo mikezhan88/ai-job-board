@@ -10,20 +10,7 @@ export default function NewJobListingPage() {
       </p>
       <Card>
         <CardContent>
-        <JobListingForm 
-            jobListing={{
-                title: "",
-                description: "",
-                wage: null,
-                wageInterval: null,
-                type: "full-time",
-                stateAbbreviation: null,
-                city: "",
-                locationRequirement: "remote",
-                experienceLevel: "junior",
-                id: ""
-            }} 
-          />
+          <JobListingForm/>
         </CardContent>
       </Card>
     </div>
