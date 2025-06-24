@@ -27,6 +27,7 @@ import {
   hasReachedMaxPublishedJobListings,
 } from "../lib/planfeatureHelpers"
 
+
 export async function createJobListing(
   unsafeData: z.infer<typeof jobListingSchema>
 ) {
@@ -173,6 +174,7 @@ export async function deleteJobListing(id: string) {
 
   redirect("/employer")
 }
+
 
 async function getJobListing(id: string, orgId: string) {
   "use cache"
