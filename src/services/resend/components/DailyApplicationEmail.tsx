@@ -31,6 +31,18 @@ type Application = Pick<
   jobListingTitle: string
 }
 
+// Polyfill for Object.groupBy since it's not available in all environments
+function groupBy<T>(array: T[], keySelector: (item: T) => string): Record<string, T[]> {
+  return array.reduce((groups, item) => {
+    const key = keySelector(item)
+    if (!groups[key]) {
+      groups[key] = []
+    }
+    groups[key].push(item)
+    return groups
+  }, {} as Record<string, T[]>)
+}
+
 export default function DailyApplicationEmail({
   applications,
   userName,
@@ -50,7 +62,7 @@ export default function DailyApplicationEmail({
             listings.
           </Text>
           {Object.entries(
-            Object.groupBy(applications, a => a.organizationId)
+            groupBy(applications, a => a.organizationId)
           ).map(([orgId, orgApplications], i) => {
             if (orgApplications == null || orgApplications.length === 0) {
               return null
@@ -85,7 +97,7 @@ function OrganizationSection({
       <Heading as="h2" className="leading-none font-semibold text-3xl my-4">
         {orgName}
       </Heading>
-      {Object.entries(Object.groupBy(applications, a => a.jobListingId)).map(
+      {Object.entries(groupBy(applications, a => a.jobListingId)).map(
         ([jobListingId, listingApplications], i) => {
           if (listingApplications == null || listingApplications.length === 0) {
             return null

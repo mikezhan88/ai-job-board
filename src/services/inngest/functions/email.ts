@@ -15,6 +15,18 @@ import DailyJobListingEmail from "@/services/resend/components/DailyJobListingEm
 import { env } from "@/data/env/server"
 import DailyApplicationEmail from "@/services/resend/components/DailyApplicationEmail"
 
+// Polyfill for Object.groupBy since it's not available in all environments
+function groupBy<T>(array: T[], keySelector: (item: T) => string): Record<string, T[]> {
+  return array.reduce((groups, item) => {
+    const key = keySelector(item)
+    if (!groups[key]) {
+      groups[key] = []
+    }
+    groups[key].push(item)
+    return groups
+  }, {} as Record<string, T[]>)
+}
+
 export const prepareDailyUserJobListingNotifications = inngest.createFunction(
   {
     id: "prepare-daily-user-job-listing-notifications",
@@ -215,7 +227,7 @@ export const prepareDailyOrganizationUserApplicationNotifications =
 
       if (applications.length === 0 || userNotifications.length === 0) return
 
-      const groupedNotifications = Object.groupBy(
+      const groupedNotifications = groupBy(
         userNotifications,
         n => n.userId
       )
