@@ -10,7 +10,7 @@ export default function NewJobListingPage() {
       </p>
       <Card>
         <CardContent>
-          <JobListingForm/>
+          <JobListingForm />
         </CardContent>
       </Card>
     </div>

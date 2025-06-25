@@ -48,7 +48,7 @@ const NONE_SELECT_VALUE = "none"
 export function JobListingForm({
   jobListing,
 }: {
-  jobListing: Pick<
+  jobListing?: Pick<
     typeof JobListingTable.$inferSelect,
     | "title"
     | "description"
@@ -70,7 +70,7 @@ export function JobListingForm({
       stateAbbreviation: null,
       city: null,
       wage: null,
-      wageInterval: "yearly",
+      wageInterval: null,
       experienceLevel: "junior",
       type: "full-time",
       locationRequirement: "in-office",
@@ -78,7 +78,7 @@ export function JobListingForm({
   })
 
   async function onSubmit(data: z.infer<typeof jobListingSchema>) {
-    const action = jobListing
+    const action = jobListing?.id
       ? updateJobListing.bind(null, jobListing.id)
       : createJobListing
     const res = await action(data)
@@ -304,7 +304,7 @@ export function JobListingForm({
           className="w-full"
         >
           <LoadingSwap isLoading={form.formState.isSubmitting}>
-            Create Job Listing
+            {jobListing?.id ? "Update Job Listing" : "Create Job Listing"}
           </LoadingSwap>
         </Button>
       </form>
