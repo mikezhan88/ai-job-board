@@ -17,6 +17,11 @@ import {
   JobListingTable,
 } from "@/drizzle/schema"
 import {
+  ApplicationTable,
+  SkeletonApplicationTable,
+} from "@/features/jobListingApplications/components/ApplicationTable"
+import { getJobListingApplicationJobListingTag } from "@/features/jobListingApplications/db/cache/jobListingApplications"
+import {
   deleteJobListing,
   toggleJobListingFeatured,
   toggleJobListingStatus,
@@ -29,6 +34,7 @@ import {
   hasReachedMaxPublishedJobListings,
 } from "@/features/jobListings/lib/planfeatureHelpers"
 import { getNextJobListingStatus } from "@/features/jobListings/lib/utils"
+import { getUserResumeIdTag } from "@/features/users/db/cache/userResumes"
 import { getUserIdTag } from "@/features/users/db/cache/users"
 import { getCurrentOrganization } from "@/services/clerk/lib/getCurrentAuth"
 import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermissions"
@@ -125,7 +131,12 @@ async function SuspendedPage({ params }: Props) {
 
       <Separator />
 
-     
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Applications</h2>
+        <Suspense fallback={<SkeletonApplicationTable />}>
+          <Applications jobListingId={jobListingId} />
+        </Suspense>
+      </div>
     </div>
   )
 }
@@ -276,6 +287,78 @@ function featuredToggleButtonText(isFeatured: boolean) {
       Feature
     </>
   )
+}
+
+async function Applications({ jobListingId }: { jobListingId: string }) {
+  const applications = await getJobListingApplications(jobListingId)
+
+  return (
+    <ApplicationTable
+      applications={applications.map(a => ({
+        ...a,
+        user: {
+          ...a.user,
+          resume: a.user.resume
+            ? {
+                ...a.user.resume,
+                markdownSummary: a.user.resume.aiSummary ? (
+                  <MarkdownRenderer source={a.user.resume.aiSummary} />
+                ) : null,
+              }
+            : null,
+        },
+        coverLetterMarkdown: a.coverLetter ? (
+          <MarkdownRenderer source={a.coverLetter} />
+        ) : null,
+      }))}
+      canUpdateRating={await hasOrgUserPermission(
+        "org:job_listing_applications:change_rating"
+      )}
+      canUpdateStage={await hasOrgUserPermission(
+        "org:job_listing_applications:change_stage"
+      )}
+    />
+  )
+}
+
+async function getJobListingApplications(jobListingId: string) {
+  "use cache"
+  cacheTag(getJobListingApplicationJobListingTag(jobListingId))
+
+  const data = await db.query.JobListingApplicationTable.findMany({
+    where: eq(JobListingApplicationTable.jobListingId, jobListingId),
+    columns: {
+      coverLetter: true,
+      createdAt: true,
+      stage: true,
+      rating: true,
+      jobListingId: true,
+    },
+    with: {
+      user: {
+        columns: {
+          id: true,
+          name: true,
+          imageUrl: true,
+        },
+        with: {
+          resume: {
+            columns: {
+              resumeFileUrl: true,
+              aiSummary: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  data.forEach(({ user }) => {
+    cacheTag(getUserIdTag(user.id))
+    cacheTag(getUserResumeIdTag(user.id))
+  })
+
+  return data
 }
 
 async function getJobListing(id: string, orgId: string) {
